@@ -1,0 +1,123 @@
+include:
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Verify/Browser-Performance.gitlab-ci.yml
+  - template: Verify/Accessibility.gitlab-ci.yml
+  - template: Code-Quality.gitlab-ci.yml
+
+image: node:18-alpine
+
+stages:
+  - test
+  - performance
+  - accessibility
+  - Qualidade
+  - Dependências
+  - Pages
+  - Release
+
+cache:
+  paths:
+    - node_modules/
+
+license_scanning:
+  artifacts:
+    paths: [gl-license-management-report.json]
+    reports:
+      license_scanning: gl-license-management-report.json
+    expire_in: 1 week
+    expose_as: "Licenses"
+
+a11y:
+  variables:
+    a11y_urls: https://govbr-ds.gitlab.io/dev/wbc/govbr-ds-wbc
+  artifacts:
+    paths: [reports/gl-accessibility.json]
+    expire_in: 1 week
+    expose_as: "A11Y"
+
+code_quality:
+  variables:
+    REPORT_FORMAT: html
+  artifacts:
+    paths: [gl-code-quality-report.html]
+    expire_in: 1 week
+    expose_as: "Code Quality"
+  rules:
+    - if: $CODE_QUALITY_DISABLED
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+browser_performance:
+  variables:
+    URL: https://govbr-ds.gitlab.io/dev/wbc/govbr-ds-wbc-quickstart-vue/
+  artifacts:
+    paths: ["sitespeed-results/"]
+    expire_in: 1 week
+    expose_as: "Browser Performance"
+
+Commits:
+  stage: Qualidade
+  artifacts:
+    when: always
+    paths:
+      - report-commitlint.txt
+    expire_in: 1 week
+    expose_as: "Commitlint"
+  before_script:
+    - apk --no-cache add git
+    - npm install @govbr-ds/commit-config
+  script:
+    - npx commitlint-gitlab-ci -x @govbr-ds/commit-config > report-commitlint.txt
+
+Instalar dependências:
+  stage: Dependências
+  environment:
+    name: production
+  when: manual
+  artifacts:
+    paths:
+      - node_modules
+    expire_in: 1 day
+  script:
+    - apk --no-cache add git
+    - npm install --legacy-peer-deps
+  only:
+    - main
+    - next
+    - /\d.(\d|x).(\d|x)(-alpha)?$/
+    - /alpha$/
+
+pages:
+  stage: Pages
+  environment:
+    name: production
+  needs: ["Instalar dependências"]
+  artifacts:
+    paths:
+      - public
+  script:
+    - rm -rf public
+    - npm run build
+  only:
+    - main
+
+Semantic Release:
+  stage: Release
+  environment:
+    name: production
+  needs: ["Instalar dependências"]
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 week
+  before_script:
+    - apk --no-cache add git zip
+  script:
+    - npx semantic-release
+  only:
+    - main
+    - next
+    - /\d.(\d|x).(\d|x)(-alpha)?$/
+    - /alpha$/

@@ -1,0 +1,48 @@
+{
+  "name": "@govbr-ds/webcomponents-quickstart-vue",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Projeto exemplificando o uso da biblioteca de Web Components do GovBR-DS em projetos Vue.",
+  "keywords": [
+    "design system",
+    "govbr-ds",
+    "web components",
+    "vue"
+  ],
+  "homepage": "https://govbr-ds.gitlab.io/wbc/quickstarts/govbr-ds-wbc-quickstart-vue",
+  "bugs": "https://gitlab.com/govbr-ds/wbc/quickstarts/govbr-ds-wbc-quickstart-vue/-/issues",
+  "repository": "gitlab:govbr-ds/wbc/quickstarts/govbr-ds-wbc-quickstart-vue.git",
+  "license": "MIT",
+  "author": "SERPRO <govbr-ds@serpro.gov.br> (http://serpro.gov.br/)",
+  "contributors": [
+    "Dataprev (https://portal3.dataprev.gov.br/)"
+  ],
+  "scripts": {
+    "build": "vue-tsc --noEmit && vite build --outDir public --base=/wbc/quickstarts/govbr-ds-wbc-quickstart-vue/",
+    "commit": "git-cz",
+    "dev": "vite",
+    "prepare": "husky install",
+    "preview": "vite preview"
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
+  },
+  "dependencies": {
+    "@govbr-ds/core": "^3.2.0",
+    "@govbr-ds/webcomponents": "^1.8.0",
+    "@vue/cli-service": "^5.0.8",
+    "vue": "^3.2.41",
+    "vue-router": "^4.2.2"
+  },
+  "devDependencies": {
+    "@govbr-ds/commit-config": "latest",
+    "@govbr-ds/release-config": "latest",
+    "@vitejs/plugin-vue": "^3.2.0",
+    "husky": "^8.0.2",
+    "typescript": "^4.8.4",
+    "vite": "^3.2.2",
+    "vue-tsc": "^1.0.9"
+  }
+}
